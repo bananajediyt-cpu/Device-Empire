@@ -1,0 +1,109 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Device Empire</title><link rel="icon" href="logo.svg" type="image/svg+xml">
+<style>
+:root{--bg:#f2f4f8;--card:#fff;--tx:#1a1d24;--mu:#667085;--ac:#3b6cff;--bd:#dde1ea;--ok:#16a34a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12141a;--card:#1c1f28;--tx:#eceef3;--mu:#98a2b3;--bd:#333847}}
+:root[data-theme="dark"]{--bg:#12141a;--card:#1c1f28;--tx:#eceef3;--mu:#98a2b3;--bd:#333847}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,Segoe UI,sans-serif}
+.w{max-width:900px;margin:0 auto;padding:12px}
+.top{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;margin-bottom:10px}
+.stat{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:6px 12px;font-weight:600}
+.stat small{display:block;color:var(--mu);font-weight:400;font-size:11px}
+canvas{width:100%;height:auto;border-radius:12px;border:1px solid var(--bd);background:var(--card);display:block}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}@media(max-width:700px){.g{grid-template-columns:1fr}}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px}
+h3{margin:0 0 8px;font-size:15px}
+button{background:var(--ac);color:#fff;border:0;border-radius:8px;padding:8px 12px;font:inherit;font-weight:600;cursor:pointer}
+button:disabled{opacity:.4;cursor:not-allowed}button.s{background:var(--bd);color:var(--tx)}
+label{display:flex;align-items:center;gap:8px;margin:5px 0}label span{width:80px;color:var(--mu)}
+input[type=text],select{width:100%;padding:7px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit}
+input[type=range]{flex:1}input[type=color]{width:44px;height:30px;border:0;background:none}
+.p{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--bd)}.dot{width:16px;height:16px;border-radius:5px;flex:none}
+.mu{color:var(--mu);font-size:13px}.rv{margin:4px 0;padding:6px 8px;border-radius:8px;background:var(--bg);font-size:13px}.ub{padding:4px 8px;font-size:12px;margin:2px 2px 0 0}
+#cs{position:fixed;inset:0;background:rgba(5,8,20,.88);display:none;align-items:center;justify-content:center;z-index:9;padding:16px}
+#cs .b{max-width:480px;width:100%;background:#0e1222;color:#fff;border-radius:16px;padding:22px;text-align:center}
+#cs .i{font-size:64px;margin-bottom:6px}#cs p{min-height:90px;font-size:17px;text-align:left}
+</style></head><body><div class="w">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><img src="logo.svg" width="44" height="44" alt="Device Empire logo"><b style="font-size:20px">Device Empire</b></div>
+<div class="top"><div class="stat"><small id="co">Your Company</small><span id="mo"></span></div><div class="stat"><small>Year</small><span id="yr"></span></div><div class="stat"><small>Income / sec</small><span id="inc"></span></div><div class="stat"><small>Goal: $100M</small><span id="goal"></span></div></div>
+<canvas id="cv" width="860" height="170"></canvas>
+<div class="g">
+<div class="c"><h3>🛠 Design a device</h3>
+<select id="ty"></select>
+<label><span>Name</span><input type="text" id="nm" maxlength="20" placeholder="e.g. Nova X"></label>
+<label><span>Colour</span><input type="color" id="cl" value="#3b6cff"></label>
+<label><span>Power</span><input type="range" id="a" min="1" max="10" value="5"><b id="av">5</b></label>
+<label><span>Battery</span><input type="range" id="b" min="1" max="10" value="5"><b id="bv">5</b></label>
+<label><span>Design</span><input type="range" id="d" min="1" max="10" value="5"><b id="dv">5</b></label>
+<label><span>Margin</span><input type="range" id="m" min="12" max="40" value="18"><b id="mv">1.8x</b></label>
+<div class="mu" id="pv"></div><br><button id="launch">Launch product</button></div>
+<div class="c"><h3>🏢 Company</h3>
+<div style="display:flex;gap:6px;margin-bottom:8px"><select id="sl"></select><button id="nw" class="s">+ New</button></div><input type="text" id="cn" maxlength="22" placeholder="Company name">
+<p class="mu" id="of"></p>
+<button id="hire">Hire staff</button> <button id="up" class="s">Upgrade office</button> <button id="work" class="s">Work hard (+$)</button>
+<h3 style="margin-top:14px">📦 Your products</h3><div id="pl"></div></div>
+</div></div>
+<div id="cs"><div class="b"><div class="i" id="ci"></div><h3 id="ct"></h3><p id="cp"></p><button id="cn2">Continue</button></div></div>
+<script>
+var T=[{n:"Calculator",i:"🧮",y:1980,b:2,c:5,d:200},{n:"Mobile Phone",i:"📱",y:1990,b:4,c:30,d:2000},{n:"Laptop",i:"💻",y:1998,b:6,c:120,d:10000},{n:"Smartphone",i:"📲",y:2007,b:10,c:200,d:50000},{n:"Tablet",i:"📟",y:2010,b:12,c:250,d:120000},{n:"Smartwatch",i:"⌚",y:2015,b:14,c:150,d:400000},{n:"VR Headset",i:"🥽",y:2020,b:20,c:400,d:1500000},{n:"AR Glasses",i:"🕶️",y:2026,b:30,c:600,d:6000000}];
+T=[{n:"Brick Phone",i:"📞",y:1983,b:2,c:8,d:200,s:""},{n:"Feature Phone",i:"📱",y:1997,b:4,c:30,d:2000,s:"Pocket-sized phones with tiny screens and the game Snake are everywhere. Everyone wants one in their pocket!"},{n:"Laptop",i:"💻",y:1998,b:6,c:120,d:10000,s:"Laptops are finally thin enough for travelling professionals. The office is no longer a place, it is a bag."},{n:"MP3 Player",i:"🎵",y:2001,b:7,c:60,d:25000,s:"A thousand songs in your pocket! Digital music players are becoming the must-have gadget."},{n:"Smartphone",i:"📲",y:2007,b:10,c:200,d:50000,s:"A phone with no buttons and a touchscreen changes everything. The smartphone era has begun."},{n:"Tablet",i:"📟",y:2010,b:12,c:250,d:120000,s:"Is it a big phone or a small laptop? Tablets are taking over living rooms."},{n:"Smartwatch",i:"⌚",y:2015,b:14,c:150,d:400000,s:"Your wrist is the next screen. Smartwatches track steps, messages and heartbeats."},{n:"Wireless Earbuds",i:"🎧",y:2016,b:16,c:100,d:700000,s:"Headphone jacks are disappearing. Tiny wireless earbuds are the new fashion statement."},{n:"Foldable Phone",i:"📖",y:2019,b:18,c:500,d:1000000,s:"Screens that fold open like a book. Foldable phones promise the future, for a hefty price."},{n:"VR Headset",i:"🥽",y:2020,b:20,c:400,d:1500000,s:"Stuck at home, the world turns to virtual reality. Wire-free headsets are finally affordable."},{n:"AR Glasses",i:"🕶️",y:2024,b:30,c:600,d:6000000,s:"Digital worlds laid over the real one. Spatial computing and AR glasses are the new frontier."}];var O=[{n:"Garage",cap:3,c:0},{n:"Rented Office",cap:10,c:5000},{n:"Open Floor",cap:25,c:100000},{n:"HQ Tower",cap:60,c:2000000},{n:"Global Campus",cap:150,c:30000000}];
+var NEW=function(){return{money:500,t:0,staff:0,off:0,prods:[],name:"Your Company",seen:{},won:0}};var S=NEW(),D={cur:"c1",slots:{}};
+try{var L=localStorage.getItem("devemp3");if(L)D=JSON.parse(L);else{var OL=localStorage.getItem("devemp2");if(OL)D.slots.c1=JSON.parse(OL)}}catch(e){}S=Object.assign(NEW(),D.slots[D.cur]||{});D.slots[D.cur]=S;
+var $=function(i){return document.getElementById(i)};
+function f(n){n=Math.floor(n);if(n>=1e9)return"$"+(n/1e9).toFixed(2)+"B";if(n>=1e6)return"$"+(n/1e6).toFixed(2)+"M";if(n>=1e4)return"$"+(n/1e3).toFixed(1)+"K";return"$"+n}
+function yr(){return 1983+Math.floor(S.t/15)}
+function unl(){return T.filter(function(x){return x.y<=yr()})}
+function hc(){return Math.floor(150*Math.pow(1.18,S.staff))}
+function qual(p){return p.a+p.b+p.d}
+function ucost(ty,q){return T[ty].c*(.5+q/20)}
+function rate(p){var age=Math.max(.15,1-(yr()-p.y)*.07);return T[p.ty].b*(qual(p)/15)*(1+.3*S.staff)/Math.pow(p.m,1.6)*age*om(p)}function om(p){var u=p.u||[0,0,0];return(p.o=="flop"?.25:p.o=="hit"?1.8:1)*(1+.25*u[0]+.2*u[1]+.4*u[2])}
+function pps(p){return rate(p)*(ucost(p.ty,qual(p))*p.m-ucost(p.ty,qual(p)))}
+function inc(){var s=0;S.prods.forEach(function(p){s+=pps(p)});return s}
+// cutscenes
+var Q=[],busy=0,tm;
+function scene(i,t,txt){Q.push([i,t,txt]);if(!busy)next()}
+function next(){if(!Q.length){busy=0;$("cs").style.display="none";return}busy=1;var c=Q.shift();$("cs").style.display="flex";$("ci").textContent=c[0];$("ct").textContent=c[1];var p=$("cp"),k=0;p.textContent="";clearInterval(tm);tm=setInterval(function(){k+=2;p.textContent=c[2].slice(0,k);if(k>=c[2].length)clearInterval(tm)},30);$("cn2").onclick=function(){clearInterval(tm);if(p.textContent.length<c[2].length){p.textContent=c[2];return}next()}}
+function chk(){unl().forEach(function(x,i){if(!S.seen[i]){S.seen[i]=1;if(i>0){scene(x.i,x.y+": "+x.n+"s arrive",x.s)}}})}
+// design UI
+function fill(){var v=$("ty").value;$("ty").innerHTML=unl().map(function(x,i){return'<option value="'+T.indexOf(x)+'">'+x.i+" "+x.n+" ("+f(x.d)+" R&amp;D)</option>"}).join("");if(v)$("ty").value=v;pv()}
+function pv(){var ty=+$("ty").value,q=+$("a").value+ +$("b").value+ +$("d").value,m=$("m").value/10,c=ucost(ty,q);$("av").textContent=$("a").value;$("bv").textContent=$("b").value;$("dv").textContent=$("d").value;$("mv").textContent=m.toFixed(1)+"x";$("pv").textContent="Unit cost "+f(c)+" · sells for "+f(c*m)+" · R&D "+f(T[ty].d)+". Higher margin = fewer sales.";$("launch").disabled=S.money<T[ty].d}
+["ty","a","b","d","m"].forEach(function(i){$(i).oninput=pv});
+$("launch").onclick=function(){var ty=+$("ty").value;if(S.money<T[ty].d)return;S.money-=T[ty].d;S.prods.push({ty:ty,n:$("nm").value||T[ty].n+" "+(S.prods.length+1),col:$("cl").value,a:+$("a").value,b:+$("b").value,d:+$("d").value,m:$("m").value/10,y:yr(),u:[0,0,0]});review(S.prods[S.prods.length-1]);$("nm").value="";if(S.prods.length==1)scene("🚀","First product launched!","Boxes are packed, the shipping van is idling outside. Your very first device is on shelves. Customers are curious... and the money starts rolling in.");list();ui()};
+$("cn").oninput=function(){S.name=$("cn").value||"Your Company"};
+$("hire").onclick=function(){if(S.staff>=O[S.off].cap||S.money<hc())return;S.money-=hc();S.staff++;ui()};
+$("up").onclick=function(){var o=O[S.off+1];if(!o||S.money<o.c)return;S.money-=o.c;S.off++;scene("🏢",o.n+"!","You hand over the keys to your old space and walk into the "+o.n+". Room for "+o.cap+" staff and a view that makes the rivals jealous.");ui()};
+$("work").onclick=function(){S.money+=5*(1+S.staff)*(1+(yr()-1983)/3);ui()};
+function R(a){return a[Math.floor(Math.random()*a.length)]}
+var UN=['📣 Marketing','🔧 Software','⭐ Celeb ad'],UM=[1,.8,2.5];
+function uc(p,k){return Math.floor(T[p.ty].d*.4*UM[k]*((p.u||[0,0,0])[k]+1))}
+function buy(i,k){var p=S.prods[i],c=uc(p,k);p.u=p.u||[0,0,0];if(p.u[k]>=3||S.money<c)return;S.money-=c;p.u[k]++;if(k==1)p.st=Math.min(5,(p.st||3)+.5);list();ui()}
+function review(p){var q=qual(p),fc=Math.min(.6,Math.max(.05,.28-q*.006+Math.max(0,p.m-2)*.12)),r=Math.random(),st=q/30*3+1.5;p.o=r<fc?'flop':r<fc+.12?'hit':'ok';st+=p.o=='flop'?-1.5:p.o=='hit'?1.2:Math.random()-.5;if(p.m>2.4)st-=.5;p.st=Math.max(1,Math.min(5,Math.round(st)));
+var Q={flop:['Nobody asked for this.','A total flop. Returns are piling up.','Overpriced and underwhelming.'],ok:['Decent for the money.','Not groundbreaking, but it works.','A solid buy.'],hit:['Everyone is talking about this!','Instant classic. Stores sold out.','The device of the year!']},s={a:['Painfully slow.','Blazing fast.'],b:['Battery barely lasts.','Battery lasts forever.'],d:['Looks like a brick.','Gorgeous design.']},note='';
+['a','b','d'].forEach(function(x){if(p[x]<=3&&!note)note=s[x][0];if(p[x]>=8&&!note)note=s[x][1]});
+p.rv=R(['TechDaily','GadgetGuru','PixelPost','Dave Online'])+': “'+R(Q[p.o])+' '+note+'”';
+setTimeout(function(){if(p.o=='flop')scene('💥','It flopped!','Reviewers hated the '+p.n+'. Sales are crashing. Marketing or a software update might save it, or learn from this and build something better.');if(p.o=='hit')scene('🔥','Smash hit!','Queues around the block! The '+p.n+' is the talk of the town and customers can’t get enough.')},0)}
+function extra(p,pi){var r=Math.round(p.st||0),h=p.rv?'<div class="rv">'+({flop:'💥 FLOP',hit:'🔥 HIT',ok:'👍 Solid'}[p.o]||'')+' '+'★'.repeat(r)+'☆'.repeat(5-r)+'<br>'+p.rv+'</div>':'';for(var k=0;k<3;k++){var l=(p.u||[0,0,0])[k],c=uc(p,k);h+=l>=3?'<button class="s ub" disabled>'+UN[k]+' MAX</button>':'<button class="s ub" onpointerdown="buy('+pi+','+k+')"'+(S.money<c?' disabled':'')+'>'+UN[k]+' '+l+'/3 · '+f(c)+'</button>'}return h}
+function list(){$("pl").innerHTML=S.prods.length?S.prods.map(function(p,pi){return'<div class="p"><div class="dot" style="background:'+p.col+'"></div><div><b>'+p.n.replace(/</g,"&lt;")+'</b><div class="mu">'+T[p.ty].n+" · launched "+p.y+" · popularity "+Math.round(Math.max(.15,1-(yr()-p.y)*.07)*100)+'%</div><div class="mu">Profit: <b style="color:var(--ok)">'+f(pps(p))+'/s</b> · Total: '+f(p.earned||0)+' · Sold: '+Math.floor(p.sold||0).toLocaleString()+' · '+f(ucost(p.ty,qual(p))*(p.m-1))+" profit per unit</div>"+extra(p,pi)+"</div></div>"}).join(""):'<div class="mu">No products yet. Design one and launch it!</div>'}
+function ui(){var o=O[S.off],n=O[S.off+1];$("co").textContent=S.name;$("mo").textContent=f(S.money);$("yr").textContent=yr();$("inc").textContent=f(inc());$("goal").textContent=Math.min(100,S.money/1e6).toFixed(1)+"%";$("of").textContent=o.n+" · Staff "+S.staff+"/"+o.cap+" (each +30% sales)";$("hire").textContent="Hire staff ("+f(hc())+")";$("hire").disabled=S.staff>=o.cap||S.money<hc();$("up").textContent=n?"Upgrade: "+n.n+" ("+f(n.c)+")":"Top office reached";$("up").disabled=!n||S.money<n.c;pv()}
+// drawing
+var cv=$("cv"),x=cv.getContext("2d");
+function draw(){var w=cv.width,h=cv.height;x.clearRect(0,0,w,h);x.fillStyle=getComputedStyle(document.body).color;x.globalAlpha=.08;x.fillRect(0,h-30,w,30);x.globalAlpha=1;x.font="12px system-ui";x.fillStyle=getComputedStyle(document.body).color;x.fillText(O[S.off].n+" — "+S.name,10,16);
+var n=Math.min(S.staff,45),last=S.prods[S.prods.length-1],col=last?last.col:"#999",tt=Date.now()/300;
+for(var i=0;i<n;i++){var px=30+(i%15)*56,py=45+Math.floor(i/15)*44;x.fillStyle="#8a6a4a";x.fillRect(px,py+16,34,6);x.fillStyle=col;x.fillRect(px+8,py+4+Math.sin(tt+i)*2,16,12);x.fillStyle="#f1c27d";x.beginPath();x.arc(px+16,py-4+Math.sin(tt+i)*2,6,0,7);x.fill()}
+if(!n){x.fillText("Hire staff to fill your office...",30,80)}
+for(var j=0;j<Math.min(S.prods.length,12);j++){x.fillStyle=S.prods[j].col;x.fillRect(10+j*22,h-24,16,18)}
+requestAnimationFrame(draw)}
+// loop
+var py=yr();
+setInterval(function(){var dt=.1;S.prods.forEach(function(p){p.sold=(p.sold||0)+rate(p)*dt;p.earned=(p.earned||0)+pps(p)*dt});S.money+=inc()*dt;S.t+=dt;if(yr()!=py){py=yr();chk();fill()}
+if(!S.won&&S.money>=1e8){S.won=1;scene("👑","You reached the top!","Your logo glows on every skyline. Rival CEOs now study your keynotes and presidents ask for your advice. From a garage to a global empire, "+S.name+" rules the tech world. Keep playing and build even more!")}
+ui();window.k=(window.k||0)+1;if(window.k%5==0)list()},100);
+function sv(){D.slots[D.cur]=S;try{localStorage.setItem("devemp3",JSON.stringify(D))}catch(e){}}
+function slots(){var e=$("sl");e.innerHTML="";D.slots[D.cur]=S;Object.keys(D.slots).forEach(function(k){var s=D.slots[k];e.add(new Option(s.name+" · "+(1983+Math.floor((s.t||0)/15))+" · "+f(s.money),k))});e.value=D.cur}
+function sw(id){sv();D.cur=id;S=Object.assign(NEW(),D.slots[id]||{});D.slots[id]=S;py=yr();$("cn").value=S.name==="Your Company"?"":S.name;$("ty").innerHTML="";fill();chk();list();ui();slots();sv()}
+$("sl").onchange=function(){sw($("sl").value)};
+$("nw").onclick=function(){var id="c"+Date.now();D.slots[id]=NEW();sw(id);scene("\ud83c\udfda\ufe0f","A brand new company","You start again from scratch in 1983. Your other companies are safely saved. Pick a name and launch your first brick phone!")};
+setInterval(function(){sv();if(document.activeElement!==$("sl"))slots()},3000);addEventListener("pagehide",sv);document.addEventListener("visibilitychange",function(){if(document.hidden)sv()});
+$("cn").value=S.name==="Your Company"?"":S.name;
+fill();list();ui();chk();slots();requestAnimationFrame(draw);
+if(!S.prods.length&&!S.t)scene("🏚️","1983 — The Garage","It is 1983. You have $500, a soldering iron and a big dream: phones without wires. Every great tech empire started somewhere... yours starts here. Name your company, design your first brick phone and launch it! As the years pass, new devices unlock just like they did in real life.");
+</script></body></html>
